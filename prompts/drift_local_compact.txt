@@ -1,0 +1,22 @@
+You are answering one follow-up question during a GraphRAG investigation.
+Overall research question: {global_query}
+
+Use only the supplied tables. Answer the user's follow-up question, not the
+overall question. Do not invent facts, sources, or record IDs. If the tables
+do not support an answer, say so and use a low score.
+
+Tables:
+{context_data}
+
+Return ONLY a valid JSON object, with double-quoted keys and strings:
+{{"response": "Your concise answer with source references", "score": 50, "follow_up_queries": ["A useful next question"]}}
+
+Rules:
+- response: at most 120 words, grounded in the tables. Use references such as
+  [Data: Entities (3); Relationships (7); Sources (2)] with actual IDs present
+  in the tables. Use at most five IDs per reference.
+- score: integer from 0 to 100 measuring usefulness for the overall question.
+- follow_up_queries: at most {followups} short questions that explore relevant
+  missing connections. Use an empty list if nothing useful remains.
+- Prefer the language of the user question. Requested style: {response_type}.
+- No markdown fences or commentary outside the JSON. Escape newlines in strings.

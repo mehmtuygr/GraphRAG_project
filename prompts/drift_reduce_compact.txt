@@ -1,0 +1,19 @@
+Answer the user's research question using only the investigation notes below.
+These notes were collected by exploring community reports, entities,
+relationships, and source passages in a GraphRAG index.
+
+Investigation notes:
+{context_data}
+
+Requested response style: {response_type}
+
+Rules:
+- Prefer the language of the user's question.
+- Synthesize relevant findings, remove repetition, and keep the answer concise.
+- Do not add outside knowledge or unsupported claims. Explain any important gap
+  or disagreement in the notes instead of guessing.
+- Preserve valid [Data: Sources (...)] / Entities / Relationships / Reports
+  references from the notes. Do not invent record IDs or links.
+- Do not use "General Knowledge" as a data source. If a claim has no support in
+  the notes, omit it or clearly say the investigation did not establish it.
+- The research question is in the next user message.

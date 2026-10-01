@@ -1,0 +1,157 @@
+completion_models:
+  index_model:
+    type: litellm
+    model_provider: openai
+    model: udl-qwen-local:latest
+    api_base: http://127.0.0.1:11434/v1
+    auth_method: api_key
+    api_key: ollama-local-only
+    call_args:
+      timeout: 600
+      temperature: 0
+      max_tokens: 1600
+    retry:
+      type: exponential_backoff
+      max_retries: 2
+      base_delay: 2.0
+  query_model:
+    type: litellm
+    model_provider: openai
+    model: udl-qwen-local:latest
+    api_base: http://127.0.0.1:11434/v1
+    auth_method: api_key
+    api_key: ollama-local-only
+    call_args:
+      timeout: 600
+      temperature: 0
+      max_tokens: 1000
+    retry:
+      type: exponential_backoff
+      max_retries: 2
+      base_delay: 2.0
+embedding_models:
+  default_embedding_model:
+    type: litellm
+    model_provider: openai
+    model: embeddinggemma:latest
+    api_base: http://127.0.0.1:11434/v1
+    auth_method: api_key
+    api_key: ollama-local-only
+    call_args:
+      timeout: 600
+    retry:
+      type: exponential_backoff
+      max_retries: 2
+      base_delay: 2.0
+input:
+  type: text
+  file_pattern: .*\.txt$$
+chunking:
+  type: tokens
+  size: 600
+  overlap: 80
+  encoding_model: o200k_base
+input_storage:
+  type: file
+  base_dir: input
+output_storage:
+  type: file
+  base_dir: output/local
+reporting:
+  type: file
+  base_dir: logs
+cache:
+  type: json
+  storage:
+    type: file
+    base_dir: cache/local
+vector_store:
+  type: lancedb
+  db_uri: output/local/lancedb
+  vector_size: 768
+embed_text:
+  embedding_model_id: default_embedding_model
+  names:
+  - text_unit_text
+  - entity_description
+  - community_full_content
+  batch_size: 1
+  batch_max_tokens: 1200
+extract_graph:
+  completion_model_id: index_model
+  prompt: prompts/extract_graph.txt
+  entity_types:
+  - concept
+  - model
+  - method
+  - task
+  - metric
+  - person
+  max_gleanings: 0
+summarize_descriptions:
+  completion_model_id: index_model
+  prompt: prompts/summarize_descriptions.txt
+  max_length: 350
+  max_input_tokens: 1600
+extract_graph_nlp:
+  text_analyzer:
+    extractor_type: regex_english
+cluster_graph:
+  max_cluster_size: 10
+extract_claims:
+  enabled: false
+  completion_model_id: index_model
+  prompt: prompts/extract_claims.txt
+  description: Any claims or facts that could be relevant to information discovery.
+  max_gleanings: 1
+community_reports:
+  completion_model_id: index_model
+  graph_prompt: prompts/community_report_graph.txt
+  text_prompt: prompts/community_report_text.txt
+  max_length: 500
+  max_input_length: 1600
+snapshots:
+  graphml: false
+  embeddings: false
+  raw_graph: false
+local_search:
+  completion_model_id: query_model
+  embedding_model_id: default_embedding_model
+  prompt: prompts/local_search_system_prompt.txt
+  max_context_tokens: 1800
+  top_k_entities: 12
+  top_k_relationships: 15
+global_search:
+  completion_model_id: query_model
+  map_prompt: prompts/global_search_map_system_prompt.txt
+  reduce_prompt: prompts/global_search_reduce_system_prompt.txt
+  knowledge_prompt: prompts/global_search_knowledge_system_prompt.txt
+  data_max_tokens: 1800
+  max_context_tokens: 1800
+  map_max_length: 300
+  reduce_max_length: 500
+drift_search:
+  completion_model_id: query_model
+  embedding_model_id: default_embedding_model
+  prompt: prompts/drift_local_compact.txt
+  reduce_prompt: prompts/drift_reduce_compact.txt
+  data_max_tokens: 1800
+  concurrency: 1
+  local_search_max_data_tokens: 3200
+  primer_llm_max_tokens: 1000
+  local_search_llm_max_gen_tokens: 1000
+  reduce_max_tokens: 1000
+  drift_k_followups: 2
+  primer_folds: 1
+  n_depth: 2
+  local_search_text_unit_prop: 0.5
+  local_search_community_prop: 0.0
+  local_search_top_k_mapped_entities: 6
+  local_search_top_k_relationships: 8
+basic_search:
+  completion_model_id: query_model
+  embedding_model_id: default_embedding_model
+  prompt: prompts/basic_search_system_prompt.txt
+  k: 8
+  max_context_tokens: 1800
+concurrent_requests: 1
