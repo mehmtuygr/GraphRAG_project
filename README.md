@@ -1,8 +1,30 @@
-﻿# Understanding Deep Learning — Yerel GraphRAG
+# Local GraphRAG for Technical Book Question Answering
 
-**Understanding Deep Learning kitabına soru sormak, kavramlar arasındaki ilişkileri keşfetmek ve farklı arama yöntemlerini karşılaştırmak için hazırlanmış bir Python uygulaması.** Microsoft GraphRAG ile kitap bir bilgi grafiğine dönüştürülür; cevaplar Ollama üzerinden bilgisayarda çalışan dil modeliyle üretilir. Kullanıcı arayüzü Gradio ile hazırlanmıştır.
+A local question-answering and knowledge graph exploration application for **Understanding Deep Learning**, built with Microsoft GraphRAG and Ollama.
 
-Örneğin, “Geri yayılım nasıl çalışır?” gibi belirli bir konuyu sorabilir, kitabın genel temalarını inceleyebilir veya iki kavramın grafikte nasıl bağlandığını görebilirsiniz.
+**Tech stack:** Python · Microsoft GraphRAG · Ollama · Qwen3 · EmbeddingGemma · LanceDB · Gradio · PyMuPDF
+
+- **Knowledge graph extraction:** entities, relationships and community reports from the book.
+- **Four retrieval strategies:** Basic, Local, Global and DRIFT.
+- **Interactive graph explorer:** concept search, one- and two-hop neighborhoods, and entity/relationship descriptions.
+- **Local inference:** generation and embeddings through Ollama; no paid model API key required with the supplied configuration.
+- **Evaluation:** compares the four retrieval strategies on a curated 12-question English pilot set, with runtime tracking, citation ID checks and separately reviewed quality scores.
+
+## Demo
+
+### Question Answering
+
+Local search answering **“How does backpropagation work, and how is it related to gradient descent?”**, with source references in the generated response.
+
+![Local GraphRAG question-answering interface showing a backpropagation question and generated answer](assets/query-demo.png)
+
+### Knowledge Graph Explorer
+
+A neighborhood view centered on **Backpropagation**, showing **22 concepts and 53 relationships**, with the selected entity's description in the side panel. The view displays stored graph relationships rather than the retrieval trace of a particular answer.
+
+![Knowledge graph explorer showing Backpropagation and related concepts](assets/graph-explorer.png)
+
+The screenshots show an example run; generated answers and extracted graph descriptions can contain errors and should be checked against the book.
 
 ## Proje neler sunuyor?
 
@@ -49,6 +71,23 @@ Global arama varsayılan olarak rapor özetlerini kullanır. Arayüzde **“tam 
 | PyMuPDF | PDF'den metin çıkarma |
 
 Paket sürüm aralıkları [requirements.txt](requirements.txt), arama ve model ayarları [settings.yaml](settings.yaml), Ollama model parametreleri [Modelfile](Modelfile) içindedir.
+
+## Cevap kalitesini değerlendirme
+
+Projede dört arama yöntemini karşılaştıran 12 soruluk bir İngilizce değerlendirme seti bulunur. Soruların 10'u kitapta cevaplanabilen konuları, 2'si cevaplanamayan sorularda modelin davranışını inceler.
+
+İndeks hazır ve Ollama çalışırken:
+
+```powershell
+.\.venv\Scripts\python.exe -B tests/run_eval.py
+.\.venv\Scripts\python.exe -B tests/summarize_eval.py
+```
+
+İlk komut sorguları çalıştırır ve sonuçları kaydeder. İkinci komut kayıtlı cevapları ve indeksi okuyarak atıf denetimi ve rapor üretir; model çağırmaz. Sonuçlar `eval/results/pilot-v1/` altında oluşur ve arayüzün **Eval Sonuçları** sekmesinden okunur.
+
+Doğruluk, tamlık ve kaynak desteği puanları otomatik olarak verilmez; ayrı inceleme yapılıp `review.json` içine kaydedilmesi gerekir. İncelenmemiş cevapların puanları boş kalır. Bir kaynak kimliğinin indekste bulunması, ilgili iddiayı gerçekten desteklediğini tek başına kanıtlamaz.
+
+Yeniden çalıştırma mevcut sorgu kayıtlarını atlar. Farklı bir deney için `--out eval/results/deney-2` gibi yeni bir klasör belirtin; raporlama komutuna da aynı `--out` değerini verin. Arayüz varsayılan `pilot-v1` klasörünü okur. Ayrıntılı kurallar [eval/README.md](eval/README.md) içindedir.
 
 ## Kurulum
 
@@ -147,26 +186,10 @@ Komut satırından da sorgulayabilirsiniz:
 
 **Graf Keşfi** sekmesinde örneğin `backpropagation` aratın, eşleşen kavramı seçin ve grafiği gösterin. Grafik, kayıtlı ilişkileri gösterir; belirli bir cevabın üretim sırasında izlediği yolu göstermez.
 
-## Cevap kalitesini değerlendirme
-
-Projede dört arama yöntemini karşılaştıran 12 soruluk bir İngilizce değerlendirme seti bulunur. Soruların 10'u kitapta cevaplanabilen konuları, 2'si cevaplanamayan sorularda modelin davranışını inceler.
-
-İndeks hazır ve Ollama çalışırken:
-
-```powershell
-.\.venv\Scripts\python.exe -B tests/run_eval.py
-.\.venv\Scripts\python.exe -B tests/summarize_eval.py
-```
-
-İlk komut sorguları çalıştırır ve sonuçları kaydeder. İkinci komut kayıtlı cevapları ve indeksi okuyarak atıf denetimi ve rapor üretir; model çağırmaz. Sonuçlar `eval/results/pilot-v1/` altında oluşur ve arayüzün **Eval Sonuçları** sekmesinden okunur.
-
-Doğruluk, tamlık ve kaynak desteği puanları otomatik olarak verilmez; ayrı inceleme yapılıp `review.json` içine kaydedilmesi gerekir. İncelenmemiş cevapların puanları boş kalır. Bir kaynak kimliğinin indekste bulunması, ilgili iddiayı gerçekten desteklediğini tek başına kanıtlamaz.
-
-Yeniden çalıştırma mevcut sorgu kayıtlarını atlar. Farklı bir deney için `--out eval/results/deney-2` gibi yeni bir klasör belirtin; raporlama komutuna da aynı `--out` değerini verin. Arayüz varsayılan `pilot-v1` klasörünü okur. Ayrıntılı kurallar [eval/README.md](eval/README.md) içindedir.
-
 ## Proje yapısı
 
 ```text
+assets/                 README demo ekran görüntüleri
 app.py                  Gradio arayüzü
 settings.yaml           GraphRAG ve yerel model ayarları
 Modelfile               Ollama proje modeli
