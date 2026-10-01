@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+data/
+input/
+output/
+cache/
+logs/
+eval/results/
